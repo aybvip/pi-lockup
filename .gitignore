@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# build / generated
+_site/
+dist/
+census.json
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# local env (no secrets belong in this repo anyway)
+.env
+.env.*

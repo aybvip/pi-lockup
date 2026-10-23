@@ -1,0 +1,44 @@
+name: self-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    name: offline tests (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: no dependencies to install
+        run: node --version
+      - name: formula assertions
+        run: node examples/lockup-math.mjs --test
+      - name: predicate decoder assertions
+        run: node examples/inspect-lockups.mjs --self-test
+      - name: census assertions
+        run: node examples/lockup-census.mjs --self-test
+
+  live:
+    name: live ledger read (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: sample Pi Mainnet
+        run: node examples/lockup-census.mjs --sample 500

@@ -1,0 +1,37 @@
+{
+  "name": "pi-lockup",
+  "version": "1.0.0",
+  "private": true,
+  "description": "What a Pi lockup actually is: the official formula, the two lockup mechanisms, the on-chain census, and the PiPower baseline rule — with zero-dependency, read-only scripts.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node examples/lockup-math.mjs --test && node examples/inspect-lockups.mjs --self-test && node examples/lockup-census.mjs --self-test",
+    "test:math": "node examples/lockup-math.mjs --test",
+    "test:inspect": "node examples/inspect-lockups.mjs --self-test",
+    "test:census": "node examples/lockup-census.mjs --self-test",
+    "census": "node examples/lockup-census.mjs --sample 2000",
+    "formula": "node examples/lockup-math.mjs --lp 100 --duration 3y --sessions 630",
+    "serve": "node -e \"const h=require('http'),f=require('fs'),p=require('path');h.createServer((q,r)=>{const t=q.url==='/'?'/index.html':q.url;const fp=p.join(process.cwd(),t.split('?')[0]);f.readFile(fp,(e,d)=>{if(e){r.writeHead(404);return r.end('not found')}const ext=p.extname(fp);r.writeHead(200,{'content-type':ext==='.html'?'text/html; charset=utf-8':ext==='.md'?'text/markdown; charset=utf-8':'text/plain; charset=utf-8'});r.end(d)})}).listen(4173,()=>console.log('http://localhost:4173'))\""
+  },
+  "keywords": [
+    "pi-network",
+    "pi-coin",
+    "lockup",
+    "staking",
+    "vesting",
+    "claimable-balances",
+    "stellar",
+    "pipeline"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aybvip/pi-lockup.git"
+  },
+  "author": "aybvip",
+  "dependencies": {},
+  "devDependencies": {}
+}

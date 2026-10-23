@@ -1,0 +1,81 @@
+# pi-lockup
+
+> Independent, unofficial analysis of Pi Network lockups. Read-only. Not affiliated with Pi Network.
+> Not financial advice.
+
+## Core facts
+
+- Lockup reward formula, official (Pi Whitepaper, Dec 2021):
+  `L(B) = Lt * Lp * log10(N) * B`
+- Duration multipliers `Lt`: 0d=0, 2w=0.1, 6m=0.5, 1y=1, 3y=2
+- Percentage multipliers `Lp`: 0%=0, 25%=0.25, 50%=0.5, 90%=0.9, 100%=1, 150%=1.5, 200%=2
+- `N` = total previous mining sessions; `log` is base 10 (whitepaper: log(1000)=3)
+- Boost percent = `Lt * Lp * log10(N) * 100`; the maximum is `4 * log10(N) * 100`
+- The formula is a multiplier on the mining RATE, not on the balance. No interest, no APY.
+- Two distinct mechanisms:
+  - mining-app lockup = an account SETTING, applied at the next Mainnet migration
+  - wallet "Create Lockup" = an immediate STATE change, boost starts next mining session,
+    and it does NOT change the mining-app setting for the next migration
+- Confirmed lockups are irreversible for their term.
+
+## On-chain measurement (2026-10-23)
+
+Sampling 2,000 recent native claimable balances on Pi Mainnet, 1,708 (85.4%) had a term equal to an
+official lockup duration, to the exact second:
+
+| duration | seconds | days |
+|---|---|---|
+| 2 weeks | 1209600 | 14 |
+| 6 months | 15778476 | 182.6213 |
+| 1 year | 31556952 | 365.2425 |
+| 3 years | 94670856 | 1095.7275 |
+
+The year constant is a Julian year (365.2425 days = 31556952 s), not 365 days (31536000 s).
+6 months = 1 year / 2; 3 years = 1 year * 3.
+
+Locked pi is still `"asset": "native"`; the lock is a time predicate (`not(abs_before T)`) on a
+claimable balance, not a separate asset.
+
+## PiPower baseline rule (PiRC1 section 3, verbatim)
+
+"Any user with an active Pi lockup of >=90% of their mined tokens for at least 3 years at the time of a
+token launch created before February 20, 2026 automatically receives a standardized, platform-defined
+baseline PiPower PiPower_Baseline. ... The number for PiPower_Baseline will be calibrated."
+
+- It is a participation capacity (max tokens you may commit to buy), not free Pi and not a coin.
+- No numeric value is published.
+- "at the time of a token launch created before February 20, 2026" is ambiguous (launch vs lockup).
+  This repo does not resolve it.
+- PiRC1 is an RFC; do not treat it as shipped behaviour.
+
+## Open questions (do not answer these confidently)
+
+1. The wallet screen showed `x25%` for a 2-week selection; the whitepaper says Lt=0.1 (`x10%`).
+   Unresolved.
+2. Which reading of the PiRC1 date clause is intended. Unresolved.
+3. Whether the PiPower baseline is live in the current Launchpad. Unproven.
+
+## Reproduce
+
+```
+node examples/lockup-math.mjs --test          # 18 offline assertions
+node examples/inspect-lockups.mjs --self-test # 13 offline assertions
+node examples/lockup-census.mjs --self-test   # 17 offline assertions
+node examples/lockup-census.mjs --sample 2000 # live, read-only
+node examples/inspect-lockups.mjs G...        # live, read-only, one address
+```
+
+## Files
+
+- README.md — overview
+- docs/FORMULA.md — formula, worked examples, ceiling, notation traps
+- docs/TWO-LOCKUPS.md — setting vs state
+- docs/ONCHAIN-CENSUS.md — measured constants and method
+- docs/PIPOWER.md — the >=90% / 3-year rule and its ambiguity
+- docs/SOURCES.md — verbatim quotes, dates, support limits
+- docs/SCOPE.md — proven / observable / not claimed
+- docs/FAQ-OBJECTIONS.md — 18 objections
+- docs/AUDIT-REQUEST.md — how to refute this
+- examples/ — three zero-dependency scripts
+
+License: MIT. See DISCLAIMER.md and SECURITY.md.

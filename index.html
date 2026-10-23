@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>π🔒 — What a Pi lockup actually is</title>
+<meta name="description" content="Independent, source-verified analysis of Pi Network lockups: the official formula, the two lockup mechanisms, the on-chain duration constants, and the PiPower baseline rule." />
+<meta name="color-scheme" content="dark light" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>π</text></svg>" />
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #12161c;
+    --line: #232a34;
+    --fg: #e8edf4;
+    --muted: #97a3b6;
+    --accent: #f7c948;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 50% -10%, #16202b 0%, var(--bg) 60%);
+    color: var(--fg);
+    font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 0 20px 80px;
+  }
+  main { max-width: 940px; margin: 0 auto; }
+  header { padding: 72px 0 40px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .badge {
+    font-size: 12px; letter-spacing: .02em; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); background: #0f141a;
+  }
+  .badge.warn { color: var(--warn); border-color: #4a3a12; background: #1a1509; }
+  h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.08; margin: 0 0 16px; letter-spacing: -0.02em; }
+  h1 .pi { color: var(--accent); }
+  .lede { font-size: 19px; color: var(--muted); max-width: 62ch; margin: 0; }
+  .lede strong { color: var(--fg); font-weight: 600; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 56px 0 16px; font-weight: 600; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .card h3 { margin: 0 0 8px; font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  tr:last-child td { border-bottom: 0; }
+  code, pre { font-family: var(--mono); }
+  code { background: #0a0e13; border: 1px solid var(--line); padding: 1.5px 6px; border-radius: 6px; font-size: 13.5px; }
+  pre { background: #080b0f; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; }
+  pre code { background: none; border: 0; padding: 0; }
+  .formula { font-family: var(--mono); font-size: clamp(15px, 3.2vw, 22px); text-align: center; padding: 26px; color: var(--accent); }
+  .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  a { color: #9ecbff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .links a { border: 1px solid var(--line); background: #0f141a; padding: 9px 13px; border-radius: 10px; font-size: 14px; }
+  blockquote { margin: 0; padding: 14px 18px; border-left: 3px solid var(--accent); background: #0f141a; border-radius: 0 10px 10px 0; color: var(--muted); font-size: 14.5px; }
+  footer { margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <div class="badges">
+      <span class="badge warn">Independent · unofficial</span>
+      <span class="badge">Zero dependencies</span>
+      <span class="badge">Read-only ledger access</span>
+      <span class="badge">MIT</span>
+    </div>
+    <h1><span class="pi">π🔒</span> What a Pi lockup actually is</h1>
+    <p class="lede">
+      A lockup buys a <strong>rate</strong>, not a return — and it changes a π's <strong>state</strong>,
+      not its identity. Everything below is either quoted from an official document or measured on the
+      public ledger.
+    </p>
+  </header>
+
+  <h2>The official formula</h2>
+  <div class="card">
+    <div class="formula">L(B) = Lt · Lp · log<sub>10</sub>(N) · B</div>
+    <p style="color:var(--muted);font-size:14px;margin:0;text-align:center">
+      Pi Whitepaper, December 2021 — <em>Token Model and Mining</em>
+    </p>
+  </div>
+
+  <h2>Multipliers</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>Duration <code>Lt</code></h3>
+      <div class="scroll">
+        <table>
+          <tr><td>2 weeks</td><td class="num">0.1</td></tr>
+          <tr><td>6 months</td><td class="num">0.5</td></tr>
+          <tr><td>1 year</td><td class="num">1</td></tr>
+          <tr><td>3 years</td><td class="num">2</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Percentage <code>Lp</code></h3>
+      <div class="scroll">
+        <table>
+          <tr><td>25 %</td><td class="num">0.25</td></tr>
+          <tr><td>50 %</td><td class="num">0.5</td></tr>
+          <tr><td>90 %</td><td class="num">0.9</td></tr>
+          <tr><td>100 %</td><td class="num">1.0</td></tr>
+          <tr><td>200 %</td><td class="num">2.0</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Why it is counter-intuitive</h3>
+      <p>
+        <code>+559.90 %</code> is one number with three unknowns. Multiple
+        (<code>Lt</code>, <code>Lp</code>, <code>N</code>) combinations reproduce it, so the displayed boost
+        does not reveal the settings.
+      </p>
+    </div>
+  </div>
+
+  <h2>Measured on Pi Mainnet · 2026-10-23</h2>
+  <div class="card">
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14.5px">
+      Sampling the 2 000 most recent native claimable balances: <strong>1 708 (85.4 %)</strong> carry a term
+      equal — to the exact second — to an official duration.
+    </p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Duration</th><th>Seconds</th><th>Days</th><th>Share</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2 weeks</td><td class="num">1 209 600</td><td class="num">14</td><td class="num">39.9 %</td></tr>
+          <tr><td>6 months</td><td class="num">15 778 476</td><td class="num">182.6213</td><td class="num">18.1 %</td></tr>
+          <tr><td>1 year</td><td class="num">31 556 952</td><td class="num">365.2425</td><td class="num">18.9 %</td></tr>
+          <tr><td>3 years</td><td class="num">94 670 856</td><td class="num">1095.7275</td><td class="num">8.5 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      The year constant is a <strong>Julian year</strong> — <code>365 × 86 400</code> would be
+      <code>31 536 000</code>, which is 20 952 seconds too short.
+      Locked π is still <code>"asset": "native"</code>: the lock is a time predicate, not another token.
+    </p>
+  </div>
+
+  <h2>Two lockups, easily confused</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>A · mining-app <span style="color:var(--muted)">(setting)</span></h3>
+      <p>
+        A percentage + duration stored as an account setting. Nothing is locked until your
+        <em>next</em> migration to Mainnet. Editing it affects only the next transfer.
+      </p>
+    </div>
+    <div class="card">
+      <h3>B · wallet <span style="color:var(--muted)">(state)</span></h3>
+      <p>
+        Locks π immediately. Boost starts with the next mining session. It explicitly does
+        <strong>not</strong> change the app setting used for the next migration.
+      </p>
+    </div>
+  </div>
+
+  <h2>The PiPower rule — quoted, not paraphrased</h2>
+  <blockquote>
+    “Any user with an active Pi lockup of ≥90% of their mined tokens for at least 3 years at the time of a
+    token launch created before February 20, 2026 automatically receives a standardized, platform-defined
+    baseline PiPower … <strong>The number for PiPower_Baseline will be calibrated.</strong>”
+    <br /><br />
+    — PiRC1 §3
+  </blockquote>
+  <p style="color:var(--muted);font-size:14.5px">
+    A participation capacity, not free π. No published value. And the date clause is genuinely ambiguous —
+    this project refuses to resolve it by assertion.
+  </p>
+
+  <h2>Reproduce it</h2>
+  <pre><code>node examples/lockup-math.mjs --test            #  18 offline assertions
+node examples/inspect-lockups.mjs --self-test   #  13 offline assertions
+node examples/lockup-census.mjs --self-test     #  17 offline assertions
+
+node examples/lockup-math.mjs --lp 100 --duration 3y --sessions 630
+node examples/lockup-math.mjs --solve 559.90
+node examples/lockup-census.mjs --sample 2000
+node examples/inspect-lockups.mjs G...</code></pre>
+
+  <h2>Read more</h2>
+  <div class="links">
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/README.md">README</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/FORMULA.md">Formula</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/TWO-LOCKUPS.md">Two lockups</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/ONCHAIN-CENSUS.md">On-chain census</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/PIPOWER.md">PiPower</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/SOURCES.md">Sources</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/SCOPE.md">Scope</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/FAQ-OBJECTIONS.md">Objections</a>
+    <a href="https://github.com/aybvip/pi-lockup/blob/main/docs/AUDIT-REQUEST.md">Audit request</a>
+  </div>
+
+  <footer>
+    Independent and unofficial. Not affiliated with Pi Network. Not financial advice.
+    No private keys, no transactions, no writes — every script is read-only.
+    <br />
+    No APY exists, because no interest is paid. A lockup changes your mining <em>rate</em>, never your balance.
+  </footer>
+
+</main>
+</body>
+</html>

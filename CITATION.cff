@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this analysis, cite it as below."
+title: "π🔒 — What a Pi lockup actually is"
+abstract: >-
+  An independent, source-verified analysis of Pi Network lockups: the official
+  lockup reward formula L(B) = Lt * Lp * log(N) * B, the distinction between the
+  mining-app lockup setting and the wallet lockup, the on-chain encoding of the
+  four lockup durations (exact second counts based on a 365.2425-day Julian year),
+  and the PiRC1 section 3 baseline PiPower rule for long-term lockers.
+authors:
+  - family-names: "aybvip"
+    name: "aybvip"
+version: "1.0.0"
+date-released: "2026-10-23"
+license: MIT
+repository-code: "https://github.com/aybvip/pi-lockup"
+url: "https://github.com/aybvip/pi-lockup"
+keywords:
+  - pi-network
+  - lockup
+  - vesting
+  - claimable-balances
+  - stellar
+  - pipower
+  - tokenomics
+references:
+  - type: document
+    title: "Pi Network Whitepaper — December 2021 (Token Model and Mining)"
+    url: "https://minepi.com/white-paper/"
+  - type: software
+    title: "PiRC1: Pi Ecosystem Token Design"
+    url: "https://github.com/PiNetwork/PiRC/blob/main/PiRC1/3-participation.md"
